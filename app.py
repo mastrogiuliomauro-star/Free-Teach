@@ -1,31 +1,35 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 
-# Prendi la chiave dai Secrets
-api_key = st.secrets["GOOGLE_API_KEY"]
-genai.configure(api_key=api_key)
+# Configurazione con la NUOVA libreria Google GenAI
+client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
 
 st.title("Tutor Personale - Free Teach")
 
-# Configurazione modello (SENZA "models/")
-model = genai.GenerativeModel('gemini-1.5-flash')
-
+# Inizializza la cronologia se non esiste
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Mostra i messaggi precedenti
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Come posso aiutarti oggi?"):
+# Input dell'utente
+if prompt := st.chat_input("Come posso aiutarti?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
     try:
-        response = model.generate_content(prompt)
+        # Nuova sintassi per generare la risposta
+        response = client.models.generate_content(
+            model="gemini-1.5-flash", 
+            contents=prompt
+        )
+        
         with st.chat_message("assistant"):
             st.markdown(response.text)
         st.session_state.messages.append({"role": "assistant", "content": response.text})
     except Exception as e:
-        st.error(f"Errore: {e}")
+        st.error(f"Ops! Qualcosa è andato storto: {e}")
