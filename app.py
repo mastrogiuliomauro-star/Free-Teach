@@ -1,43 +1,47 @@
 import streamlit as st
 from google import genai
 
-st.set_page_config(page_title="Free Teach - Tutor AI", layout="centered")
-st.title("🤖 Il tuo Tutor Personale")
+st.title("Tutor AI - Ultimo Tentativo")
 
-# Recupero chiave dai Secrets
+# Recupero chiave
 api_key = st.secrets.get("GOOGLE_API_KEY")
 
 if not api_key:
-    st.error("Manca la chiave API! Incollala nei Secrets di Streamlit.")
+    st.error("Manca la chiave nei Secrets!")
 else:
-    # Configurazione Client 2026
+    # Inizializzazione Client
     client = genai.Client(api_key=api_key)
 
-    # Inizializzazione chat
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Visualizzazione messaggi
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
 
-    # Input utente
-    if prompt := st.chat_input("Chiedimi qualsiasi cosa..."):
+    if prompt := st.chat_input("Scrivi qui..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
         try:
-            # Usiamo 1.5-flash che è il più stabile per il piano gratuito
+            # USIAMO IL NOME "LATEST" PER AGGIRARE IL BUG DEL 404
             response = client.models.generate_content(
-                model="gemini-1.5-flash",
+                model="gemini-1.5-flash-latest", 
                 contents=prompt
             )
             
+            res_text = response.text
             with st.chat_message("assistant"):
-                st.markdown(response.text)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
+                st.markdown(res_text)
+            st.session_state.messages.append({"role": "assistant", "content": res_text})
             
         except Exception as e:
-            st.error(f"Errore di comunicazione: {e}")
+            st.error(f"Ancora errore: {e}")
+            # Se fallisce, stampiamo la lista dei modelli per capire cosa vede il tuo PC
+            st.write("Modelli disponibili per la tua chiave:")
+            try:
+                for m in client.models.list():
+                    st.write(f"- {m.name}")
+            except:
+                st.write("Impossibile recuperare la lista modelli.")
