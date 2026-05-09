@@ -1,35 +1,38 @@
 import streamlit as st
 from google import genai
 
-# Configurazione con la NUOVA libreria Google GenAI
-client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
+# Recupera la chiave dai Secrets
+api_key = st.secrets.get("GOOGLE_API_KEY")
 
-st.title("Tutor Personale - Free Teach")
+if not api_key:
+    st.error("Manca la chiave API nei Secrets di Streamlit!")
+else:
+    # Nuova configurazione 2026
+    client = genai.Client(api_key=api_key)
 
-# Inizializza la cronologia se non esiste
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.title("Tutor Personale - Free Teach")
 
-# Mostra i messaggi precedenti
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-# Input dell'utente
-if prompt := st.chat_input("Come posso aiutarti?"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    try:
-        # Nuova sintassi per generare la risposta
-        response = client.models.generate_content(
-            model="gemini-1.5-flash", 
-            contents=prompt
-        )
-        
-        with st.chat_message("assistant"):
-            st.markdown(response.text)
-        st.session_state.messages.append({"role": "assistant", "content": response.text})
-    except Exception as e:
-        st.error(f"Ops! Qualcosa è andato storto: {e}")
+    if prompt := st.chat_input("Chiedimi pure..."):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        try:
+            # Sintassi per la nuova libreria
+            response = client.models.generate_content(
+                model="gemini-1.5-flash",
+                contents=prompt
+            )
+            
+            with st.chat_message("assistant"):
+                st.markdown(response.text)
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
+        except Exception as e:
+            st.error(f"Errore tecnico: {e}")
