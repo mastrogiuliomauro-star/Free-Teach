@@ -1,45 +1,43 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Configurazione della pagina
+# Configurazione Pagina
 st.set_page_config(page_title="Free Teach", page_icon="📖")
 st.title("📖 Free Teach")
-st.caption("Il tuo tutor personale AI - Creato da Daniele")
+st.subheader("Il tuo tutor personale gratuito")
 
-# Caricamento della chiave segreta dai Secrets di Streamlit
+# Recupero della chiave dai Secrets
 if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("ERRORE: Manca la chiave API nei Secrets!")
+    st.error("Manca la chiave API! Vai nei Secrets di Streamlit e aggiungila.")
     st.stop()
 
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-# Inizializzazione del modello (usiamo 1.5-flash che è veloce e gratuito)
+# Inizializzazione del modello
+# Usiamo il nome standard che funziona con le librerie aggiornate
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# Gestione della memoria della chat
+# Memoria della chat
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Mostra i messaggi precedenti
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
 # Input dell'utente
-if prompt := st.chat_input("Chiedimi qualsiasi cosa..."):
-    # Aggiungi messaggio utente alla storia
+if prompt := st.chat_input("In cosa posso aiutarti?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Generazione risposta
     with st.chat_message("assistant"):
         try:
-            # Istruzioni per il tutor
-            full_prompt = f"Sei Free Teach, un tutor scolastico amichevole. Spiega le cose in modo semplice. Domanda: {prompt}"
+            # Qui il tutor riceve le sue istruzioni
+            full_prompt = f"Sei Free Teach, un tutor scolastico amichevole. Aiuta lo studente: {prompt}"
             response = model.generate_content(full_prompt)
             
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            st.error(f"Si è verificato un errore: {e}")
+            st.error(f"Errore di connessione: {e}")
