@@ -1,47 +1,44 @@
 import streamlit as st
 from google import genai
 
-st.title("Tutor AI - Ultimo Tentativo")
+# Configurazione Pagina
+st.set_page_config(page_title="Free Teach - Tutor AI", layout="centered")
+st.title("🤖 Il tuo Tutor Personale 2026")
 
-# Recupero chiave
+# Recupero chiave dai Secrets
 api_key = st.secrets.get("GOOGLE_API_KEY")
 
 if not api_key:
-    st.error("Manca la chiave nei Secrets!")
+    st.error("Manca la chiave API nei Secrets!")
 else:
     # Inizializzazione Client
     client = genai.Client(api_key=api_key)
 
+    # Inizializzazione chat
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+    # Visualizzazione cronologia
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    if prompt := st.chat_input("Scrivi qui..."):
+    # Input utente
+    if prompt := st.chat_input("Chiedimi pure..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
         try:
-            # USIAMO IL NOME "LATEST" PER AGGIRARE IL BUG DEL 404
+            # USIAMO IL MODELLO CHE ABBIAMO TROVATO NELLA TUA LISTA!
             response = client.models.generate_content(
-                model="gemini-1.5-flash-latest", 
+                model="gemini-2.0-flash", 
                 contents=prompt
             )
             
-            res_text = response.text
             with st.chat_message("assistant"):
-                st.markdown(res_text)
-            st.session_state.messages.append({"role": "assistant", "content": res_text})
+                st.markdown(response.text)
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
             
         except Exception as e:
-            st.error(f"Ancora errore: {e}")
-            # Se fallisce, stampiamo la lista dei modelli per capire cosa vede il tuo PC
-            st.write("Modelli disponibili per la tua chiave:")
-            try:
-                for m in client.models.list():
-                    st.write(f"- {m.name}")
-            except:
-                st.write("Impossibile recuperare la lista modelli.")
+            st.error(f"Errore tecnico: {e}")
