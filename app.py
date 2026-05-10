@@ -19,6 +19,25 @@ st.set_page_config(page_title="Free Teach - Il tuo Tutor AI", page_icon="🎓")
 st.title("🎓 Free Teach")
 st.subheader("L'intelligenza artificiale al servizio dello studio")
 
+# --- SIDEBAR: STRUMENTI ---
+with st.sidebar:
+    st.title("🛠️ Pannello Strumenti")
+    
+    # Tasto Reset
+    if st.button("🗑️ Reset Chat"):
+        st.session_state.messages = []
+        # Nota: assicurati che qui ci sia la logica per resettare anche l'history di Gemini se necessario
+        st.rerun()
+    
+    st.divider()
+    
+    # Caricatore File
+    st.subheader("📁 Carica Documenti")
+    uploaded_file = st.file_uploader("Carica un PDF o una foto", type=["pdf", "png", "jpg", "jpeg"])
+    
+    if uploaded_file:
+        st.success("File caricato con successo!")
+
 api_key = st.secrets.get("GOOGLE_API_KEY")
 
 if not api_key:
