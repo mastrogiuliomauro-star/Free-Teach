@@ -7,7 +7,7 @@ import hashlib
 from streamlit_mermaid import st_mermaid
 
 # --- 1. CONFIGURAZIONE INTERFACCIA ---
-st.set_page_config(page_title="Free Teach Ultra", page_icon="🎓", layout="wide")
+st.set_page_config(page_title="Free Teach", page_icon="🎓", layout="wide")
 
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
