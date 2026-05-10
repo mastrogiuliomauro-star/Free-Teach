@@ -8,7 +8,7 @@ try:
 except:
     st.error("⚠️ API Key non trovata nei Secrets di Streamlit!")
 
-model = genai.GenerativeModel('gemini-2.0-flash-lite')
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 # --- 2. FUNZIONE PER LEGGERE I FILE ---
 def process_upload(uploaded_file):
