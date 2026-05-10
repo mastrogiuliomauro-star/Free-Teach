@@ -61,7 +61,7 @@ def render_message(text):
                 pass 
 
 # --- 4. INTERFACCIA STREAMLIT (PROFILO BASSO) ---
-st.title("🎓 Free Teach Ultra")
+st.title("🎓 Free Teach")
 st.markdown("**Console Didattica Avanzata | AI Learning Platform**") # Nome rimosso da qui
 
 if "chat_session" not in st.session_state:
