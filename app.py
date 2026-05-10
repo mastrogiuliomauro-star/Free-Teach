@@ -1,6 +1,19 @@
 import streamlit as st
 from google import genai
 
+def process_upload(uploaded_file):
+    if uploaded_file is not None:
+        # Legge i byte del file
+        bytes_data = uploaded_file.getvalue()
+        # Crea l'oggetto che Gemini può capire
+        return [
+            {
+                "mime_type": uploaded_file.type,
+                "data": bytes_data
+            }
+        ]
+    return None
+
 # Configurazione Pagina
 st.set_page_config(page_title="Free Teach - Il tuo Tutor AI", page_icon="🎓")
 st.title("🎓 Free Teach")
@@ -27,21 +40,22 @@ else:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    if prompt := st.chat_input("Cosa studiamo oggi?"):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+   if prompt := st.chat_input("Chiedi al Tutor..."):
+    # Mostra il messaggio dell'utente
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-        with st.spinner("Free Teach sta elaborando..."):
-            try:
-                response = client.models.generate_content(
-                    model="gemini-2.0-flash-lite", 
-                    config={'system_instruction': istruzioni_tutor},
-                    contents=prompt
-                )
-                
-                with st.chat_message("assistant"):
-                    st.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
-            except Exception as e:
-                st.error(f"Ouch! Qualcosa è andato storto: {e}")
+    # Risposta del Tutor
+    with st.chat_message("assistant"):
+        # Se c'è un file caricato, lo "impacchettiamo"
+        if uploaded_file:
+            visual_context = process_upload(uploaded_file)
+            # Inviamo sia il testo che il file
+            response = st.session_state.chat_session.send_message([prompt, visual_context[0]])
+        else:
+            # Inviamo solo il testo
+            response = st.session_state.chat_session.send_message(prompt)
+        
+        st.markdown(response.text)
+        st.session_state.messages.append({"role": "assistant", "content": response.text})
