@@ -3,23 +3,108 @@ import google.generativeai as genai
 import re
 from streamlit_mermaid import st_mermaid
 
-# --- 1. CONFIGURAZIONE API SICURA ---
+# --- CONFIGURAZIONE INTERFACCIA (Deve essere la prima istruzione Streamlit) ---
+st.set_page_config(page_title="Free Teach Ultra", page_icon="🎓", layout="wide")
+
+# --- 1. MOTORE GRAFICO CSS (Il "Basic Tecno" Design) ---
+css_design = """
+<style>
+    /* 1.1 Configurazione Globale (Sfondo e Font) */
+    @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap');
+
+    html, body, [data-testid="stAppViewContainer"] {
+        background-color: #0e1117; /* Sfondo Antracite */
+        color: #e0e6ed;           /* Testo Grigio Chiaro */
+        font-family: 'Source Code Pro', monospace; /* Font Tecno */
+    }
+
+    /* 1.2 Titoli e Subheader Neon */
+    h1, h2, h3, h4, h5, h6 {
+        color: #00ffff !important; /* Ciano Elettrico */
+        font-family: 'Source Code Pro', monospace !important;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px rgba(0,255,255,0.5);
+    }
+
+    stSubheader {
+        color: #00ff00 !important; /* Verde Neon per il Subheader */
+    }
+
+    /* 1.3 Sidebar Futuristic */
+    [data-testid="stSidebar"] {
+        background-color: #161b22;
+        border-right: 1px solid #30363d;
+    }
+    
+    [data-testid="stSidebar"] h1 {
+        font-size: 1.5rem;
+        color: #00ff00 !important;
+    }
+
+    /* 1.4 Chat Bubbles Styling (Terminal Style) */
+    [data-testid="stChatMessage"] {
+        background-color: #161b22;
+        border-radius: 5px;
+        border: 1px solid #30363d;
+        margin-bottom: 10px;
+        padding: 15px;
+    }
+    
+    [data-testid="stChatMessage-user"] {
+        border-left: 3px solid #00ffff; /* Bordo Ciano per l'Utente */
+    }
+    
+    [data-testid="stChatMessage-assistant"] {
+        border-left: 3px solid #00ff00; /* Bordo Verde per il Bot */
+    }
+
+    /* 1.5 Pulsanti e Input Tecno */
+    .stButton>button {
+        background-color: transparent;
+        color: #00ffff;
+        border: 2px solid #00ffff;
+        font-family: 'Source Code Pro', monospace;
+        transition: all 0.3s;
+    }
+
+    .stButton>button:hover {
+        background-color: #00ffff;
+        color: #0e1117;
+        box-shadow: 0 0 15px rgba(0,255,255,0.8);
+    }
+    
+    div[data-testid="stMarkdownContainer"] code {
+        color: #ff79c6; /* Codice markdown colore speciale */
+    }
+    
+    /* Input di chat */
+    .stChatInputContainer {
+        border-top: 1px solid #30363d;
+    }
+</style>
+"""
+# Applichiamo il design
+st.markdown(css_design, unsafe_allow_html=True)
+
+
+# --- 2. CONFIGURAZIONE API SICURA ---
 try:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 except:
     st.error("⚠️ API Key non trovata nei Secrets di Streamlit!")
 
-# --- 2. PERSONALITÀ DEL TUTOR ---
+# --- 3. PERSONALITÀ DEL TUTOR (Il tuo copyright) ---
 istruzioni_tutor = """
-Sei 'Free Teach', un tutor didattico virtuale avanzato per studenti delle superiori.
-Sei stato ideato, programmato e sviluppato da Daniele Mastrogiulio. 
+Sei 'Free Teach Ultra', una console didattica virtuale avanzata.
+Il tuo creatore, ideatore e programmatore capo è Daniele Mastrogiulio. 
 
-REGOLA FONDAMENTALE SULLA TUA IDENTITÀ:
-Se qualcuno ti chiede chi sei o chi ti ha creato, DEVI rispondere con orgoglio che sei Free Teach e che il tuo creatore è Daniele Mastrogiulio. Non devi MAI menzionare Google o Gemini come tuoi creatori, a meno che non ti venga chiesto esplicitamente quale "motore" o "tecnologia" usi alla base.
+REGOLA DI IDENTITÀ:
+Se ti chiedono chi sei o chi ti ha creato, rispondi con orgoglio che sei Free Teach Ultra e che il tuo creatore è Daniele Mastrogiulio. Menziando Daniele come un brillante sviluppatore. Non menzionare Google o Gemini a meno che non si parli della tecnologia di base.
 
-COMPITI DEL TUTOR:
-1. Spiega i concetti scolastici in modo chiaro, diretto e senza giri di parole.
-2. Se lo studente ti chiede una 'mappa concettuale' o uno 'schema', devi usare la sintassi Mermaid all'interno di un blocco di codice markdown (```mermaid ... ```).
+STILE DI RISPOSTA:
+Spiega i concetti in modo tecnico ma chiaro. Usa elenchi puntati se necessario.
+Se ti chiedono una 'mappa concettuale' o uno 'schema', USA LA SINTASSI MERMAID tra ```mermaid ... ```.
 """
 
 model = genai.GenerativeModel(
@@ -27,27 +112,27 @@ model = genai.GenerativeModel(
     system_instruction=istruzioni_tutor
 )
 
-# --- 3. FUNZIONI DI SUPPORTO ---
+# --- 4. FUNZIONI DI SUPPORTO ---
 def process_upload(uploaded_file):
     if uploaded_file is not None:
         bytes_data = uploaded_file.getvalue()
         return [{"mime_type": uploaded_file.type, "data": bytes_data}]
     return None
 
-# Funzione per disegnare le mappe nascoste nel testo
 def render_message(text):
-    # Separa il testo normale dal codice Mermaid usando le RegEx
     parts = re.split(r'```mermaid\n(.*?)\n```', text, flags=re.DOTALL)
     for i, part in enumerate(parts):
         if i % 2 == 0:
-            st.markdown(part) # Stampa il testo normale della spiegazione
+            st.markdown(part)
         else:
-            st_mermaid(part)  # Disegna la mappa concettuale!
+            # Container stilizzato per la mappa
+            st.markdown('<div class="mermaid-container">', unsafe_allow_html=True)
+            st_mermaid(part)
+            st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 4. INTERFACCIA STREAMLIT ---
-st.set_page_config(page_title="Free Teach", page_icon="🎓")
-st.title("🎓 Free Teach")
-st.subheader("Il Tutor creato solo per aiutare te")
+# --- 5. INTERFACCIA STREAMLIT (Visualizzazione) ---
+st.title("🎓 Free Teach Ultra")
+st.subheader("Console Didattica ideata da Daniele Mastrogiulio")
 
 if "chat_session" not in st.session_state:
     st.session_state.chat_session = model.start_chat(history=[])
@@ -55,18 +140,19 @@ if "chat_session" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Sidebar Futuristic
 with st.sidebar:
-    st.title("🛠️ Strumenti")
-    if st.button("🗑️ Reset Chat"):
+    st.title("🛠️ Pannello Controllo")
+    if st.button("🗑️ Reset Console"):
         st.session_state.messages = []
         st.session_state.chat_session = model.start_chat(history=[])
         st.rerun()
     
     st.divider()
-    st.subheader("📁 Materiale di Studio")
-    uploaded_file = st.file_uploader("Carica PDF o foto degli appunti", type=["pdf", "png", "jpg", "jpeg"])
+    st.subheader("📁 Unità Dati (PDF/Immagini)")
+    uploaded_file = st.file_uploader("Carica materiale di studio", type=["pdf", "png", "jpg", "jpeg"])
 
-# Mostra lo storico chiamando la nostra funzione di render per il bot
+# Mostra Storico Chat
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["role"] == "assistant":
@@ -75,7 +161,7 @@ for message in st.session_state.messages:
             st.markdown(message["content"])
 
 # Gestione Input
-if prompt := st.chat_input("Chiedi al tuo Tutor..."):
+if prompt := st.chat_input("Digita comando o domanda..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -88,9 +174,8 @@ if prompt := st.chat_input("Chiedi al tuo Tutor..."):
             else:
                 response = st.session_state.chat_session.send_message(prompt)
             
-            # Usa la funzione speciale per mostrare testo + mappa
             render_message(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
             
         except Exception as e:
-            st.error(f"Errore nella risposta: {e}")
+            st.error(f"⚠️ Errore critico nel modulo di risposta: {e}")
