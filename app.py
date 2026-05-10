@@ -14,12 +14,12 @@ try:
 except:
     st.error("⚠️ API Key non trovata nei Secrets di Streamlit!")
 
-# --- 2. PERSONALITÀ DEL TUTOR ---
+# --- 2. PERSONALITÀ DEL TUTOR (CON EASTER EGG) ---
 istruzioni_tutor = """
 Sei 'Free Teach Ultra', una console didattica virtuale avanzata per studenti IT.
 Sei stato ideato, programmato e sviluppato da Daniele Mastrogiulio. 
 
-REGOLA FONDAMENTALE SULLA TUA IDENTITÀ:
+REGOLA FONDAMENTALE SULLA TUA IDENTITÀ (EASTER EGG):
 Se qualcuno ti chiede chi sei o chi ti ha creato, DEVI rispondere con orgoglio che sei Free Teach Ultra e che il tuo creatore è Daniele Mastrogiulio. Non devi MAI menzionare Google o Gemini come tuoi creatori.
 
 COMPITI DEL TUTOR:
@@ -41,20 +41,15 @@ def render_message(text):
         if i % 2 == 0:
             st.markdown(part)
         else:
-            # Disegna la mappa a schermo
             st_mermaid(part)
             
-            # --- FUNZIONE PRO: DOWNLOAD IMMAGINE ---
             try:
-                # Trasforma il codice in un'immagine scaricabile
                 b64 = base64.urlsafe_b64encode(part.encode('utf-8')).decode('utf-8')
                 img_url = f"https://mermaid.ink/img/{b64}"
                 response = requests.get(img_url)
                 
                 if response.status_code == 200:
-                    # Genera una chiave univoca per il bottone
                     btn_key = f"dl_btn_{hashlib.md5(part.encode()).hexdigest()}_{i}"
-                    
                     st.download_button(
                         label="📥 Scarica Mappa (Immagine PNG)",
                         data=response.content,
@@ -63,11 +58,11 @@ def render_message(text):
                         key=btn_key
                     )
             except Exception as e:
-                pass # Se il download fallisce, non blocca l'app
+                pass 
 
-# --- 4. INTERFACCIA STREAMLIT ---
+# --- 4. INTERFACCIA STREAMLIT (PROFILO BASSO) ---
 st.title("🎓 Free Teach Ultra")
-st.markdown("**Console Didattica | Sviluppata da Daniele Mastrogiulio**")
+st.markdown("**Console Didattica Avanzata | AI Learning Platform**") # Nome rimosso da qui
 
 if "chat_session" not in st.session_state:
     st.session_state.chat_session = model.start_chat(history=[])
