@@ -1,6 +1,9 @@
 import streamlit as st
 import google.generativeai as genai
 import re
+import base64
+import requests
+import hashlib
 from streamlit_mermaid import st_mermaid
 
 # --- 1. CONFIGURAZIONE INTERFACCIA ---
@@ -38,7 +41,29 @@ def render_message(text):
         if i % 2 == 0:
             st.markdown(part)
         else:
+            # Disegna la mappa a schermo
             st_mermaid(part)
+            
+            # --- FUNZIONE PRO: DOWNLOAD IMMAGINE ---
+            try:
+                # Trasforma il codice in un'immagine scaricabile
+                b64 = base64.urlsafe_b64encode(part.encode('utf-8')).decode('utf-8')
+                img_url = f"https://mermaid.ink/img/{b64}"
+                response = requests.get(img_url)
+                
+                if response.status_code == 200:
+                    # Genera una chiave univoca per il bottone
+                    btn_key = f"dl_btn_{hashlib.md5(part.encode()).hexdigest()}_{i}"
+                    
+                    st.download_button(
+                        label="📥 Scarica Mappa (Immagine PNG)",
+                        data=response.content,
+                        file_name="mappa_FreeTeach.png",
+                        mime="image/png",
+                        key=btn_key
+                    )
+            except Exception as e:
+                pass # Se il download fallisce, non blocca l'app
 
 # --- 4. INTERFACCIA STREAMLIT ---
 st.title("🎓 Free Teach Ultra")
