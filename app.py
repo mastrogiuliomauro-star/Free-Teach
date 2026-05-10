@@ -12,7 +12,7 @@ except:
 # --- 2. PERSONALITÀ DEL TUTOR ---
 istruzioni_tutor = """
 Sei 'Free Teach', un tutor didattico virtuale avanzato per studenti delle superiori.
-Sei stato ideato, programmato e sviluppato da Daniele Mastrogiulio, un brillante studente di informatica. 
+Sei stato ideato, programmato e sviluppato da Daniele Mastrogiulio. 
 
 REGOLA FONDAMENTALE SULLA TUA IDENTITÀ:
 Se qualcuno ti chiede chi sei o chi ti ha creato, DEVI rispondere con orgoglio che sei Free Teach e che il tuo creatore è Daniele Mastrogiulio. Non devi MAI menzionare Google o Gemini come tuoi creatori, a meno che non ti venga chiesto esplicitamente quale "motore" o "tecnologia" usi alla base.
@@ -47,7 +47,7 @@ def render_message(text):
 # --- 4. INTERFACCIA STREAMLIT ---
 st.set_page_config(page_title="Free Teach", page_icon="🎓")
 st.title("🎓 Free Teach")
-st.subheader("Il Tutor creato da Daniele Mastrogiulio")
+st.subheader("Il Tutor creato solo per aiutare te")
 
 if "chat_session" not in st.session_state:
     st.session_state.chat_session = model.start_chat(history=[])
