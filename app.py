@@ -41,7 +41,7 @@ def process_upload(uploaded_file):
 # --- 4. INTERFACCIA STREAMLIT ---
 st.set_page_config(page_title="Free Teach", page_icon="🎓")
 st.title("🎓 Free Teach")
-st.subheader("Il Tutor creato da Daniele Mastrogiulio")
+st.subheader("Il Tutor creato solo per te")
 
 # Inizializzazione memoria della chat
 if "chat_session" not in st.session_state:
